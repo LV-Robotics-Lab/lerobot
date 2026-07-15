@@ -51,6 +51,7 @@ from lerobot.robots import (  # noqa: F401
     make_robot_from_config,
     omx_follower,
     openarm_follower,
+    realman_ugripper_dual,
     rebot_b601_follower,
     so_follower,
 )
@@ -58,6 +59,7 @@ from lerobot.teleoperators import (  # noqa: F401
     TeleoperatorConfig,
     bi_openarm_leader,
     bi_openarm_mini,
+    bi_realman_ugripper_leader,
     bi_rebot_102_leader,
     bi_so_leader,
     gamepad,

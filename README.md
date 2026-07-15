@@ -1,3 +1,7 @@
+> [KNOWN] This is a private LV Robotics Lab snapshot of a LeRobot hardware-integration fork, not the canonical Hugging Face repository.
+>
+> [KNOWN] Read [`GITHUB_IMPORT.md`](GITHUB_IMPORT.md) for the exact source commits, LFS boundary, missing SDKs, and provenance limits.
+
 <p align="center">
   <img alt="LeRobot, Hugging Face Robotics Library" src="./media/readme/lerobot-logo-thumbnail.png" width="100%">
 </p>

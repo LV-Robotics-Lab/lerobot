@@ -19,10 +19,11 @@ from functools import cached_property
 
 from lerobot.types import RobotAction, RobotObservation
 from lerobot.utils.bimanual import BimanualMixin
-from lerobot.utils.decorators import check_if_not_connected
+from lerobot.utils.decorators import check_if_already_connected, check_if_not_connected
 
 from ..robot import Robot
 from ..so_follower import SOFollower, SOFollowerRobotConfig
+from .amazing_hand import AmazingHand
 from .config_bi_so_follower import BiSOFollowerConfig
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,7 @@ class BiSOFollower(BimanualMixin, Robot):
             disable_torque_on_disconnect=config.left_arm_config.disable_torque_on_disconnect,
             max_relative_target=config.left_arm_config.max_relative_target,
             use_degrees=config.left_arm_config.use_degrees,
+            use_gripper=not config.left_hand_config.port and config.left_arm_config.use_gripper,
             cameras=left_arm_cameras,
         )
 
@@ -69,19 +71,44 @@ class BiSOFollower(BimanualMixin, Robot):
             disable_torque_on_disconnect=config.right_arm_config.disable_torque_on_disconnect,
             max_relative_target=config.right_arm_config.max_relative_target,
             use_degrees=config.right_arm_config.use_degrees,
+            use_gripper=not config.right_hand_config.port and config.right_arm_config.use_gripper,
             cameras=config.right_arm_config.cameras,
         )
 
         self.left_arm = SOFollower(left_arm_config)
         self.right_arm = SOFollower(right_arm_config)
+        calibration_stem = config.id or "bi_so_follower"
+        self.left_hand = (
+            AmazingHand(
+                config.left_hand_config,
+                self.calibration_dir / f"{calibration_stem}_left_amazing_hand.json",
+            )
+            if config.left_hand_config.port
+            else None
+        )
+        self.right_hand = (
+            AmazingHand(
+                config.right_hand_config,
+                self.calibration_dir / f"{calibration_stem}_right_amazing_hand.json",
+            )
+            if config.right_hand_config.port
+            else None
+        )
 
         # Only for compatibility with other parts of the codebase that expect a `robot.cameras` attribute
         self.cameras = {**self.left_arm.cameras, **self.right_arm.cameras}
 
     @property
     def _motors_ft(self) -> dict[str, type]:
-        left_arm_motors_ft = self.left_arm._motors_ft
-        right_arm_motors_ft = self.right_arm._motors_ft
+        left_arm_motors_ft = dict(self.left_arm._motors_ft)
+        right_arm_motors_ft = dict(self.right_arm._motors_ft)
+
+        if self.left_hand is not None:
+            left_arm_motors_ft["gripper.pos"] = float
+            left_arm_motors_ft.update(self.left_hand.observation_features)
+        if self.right_hand is not None:
+            right_arm_motors_ft["gripper.pos"] = float
+            right_arm_motors_ft.update(self.right_hand.observation_features)
 
         return {
             **{f"left_{k}": v for k, v in left_arm_motors_ft.items()},
@@ -103,7 +130,52 @@ class BiSOFollower(BimanualMixin, Robot):
 
     @cached_property
     def action_features(self) -> dict[str, type]:
-        return self._motors_ft
+        left = dict(self.left_arm._motors_ft)
+        right = dict(self.right_arm._motors_ft)
+        if self.left_hand is not None:
+            left["gripper.pos"] = float
+        if self.right_hand is not None:
+            right["gripper.pos"] = float
+        return {
+            **{f"left_{key}": value for key, value in left.items()},
+            **{f"right_{key}": value for key, value in right.items()},
+        }
+
+    @property
+    def is_connected(self) -> bool:
+        hands_connected = (self.left_hand is None or self.left_hand.is_connected) and (
+            self.right_hand is None or self.right_hand.is_connected
+        )
+        return self.left_arm.is_connected and self.right_arm.is_connected and hands_connected
+
+    @property
+    def is_calibrated(self) -> bool:
+        hands_calibrated = (self.left_hand is None or self.left_hand.is_calibrated) and (
+            self.right_hand is None or self.right_hand.is_calibrated
+        )
+        return self.left_arm.is_calibrated and self.right_arm.is_calibrated and hands_calibrated
+
+    @check_if_already_connected
+    def connect(self, calibrate: bool = True) -> None:
+        connected = []
+        try:
+            for device in (self.left_arm, self.right_arm, self.left_hand, self.right_hand):
+                if device is not None:
+                    device.connect(calibrate)
+                    connected.append(device)
+        except Exception:
+            for device in reversed(connected):
+                device.disconnect()
+            raise
+
+    def calibrate(self) -> None:
+        for device in (self.left_arm, self.right_arm, self.left_hand, self.right_hand):
+            if device is not None:
+                device.calibrate()
+
+    def configure(self) -> None:
+        self.left_arm.configure()
+        self.right_arm.configure()
 
     def setup_motors(self) -> None:
         self.left_arm.setup_motors()
@@ -116,10 +188,18 @@ class BiSOFollower(BimanualMixin, Robot):
         # Add "left_" prefix to per-arm keys; keep top-level camera keys unprefixed.
         for key, value in self.left_arm.get_observation().items():
             obs_dict[key if key in self._top_level_cam_keys else f"left_{key}"] = value
+        if self.left_hand is not None:
+            hand_obs = self.left_hand.get_observation()
+            obs_dict.update({f"left_{key}": value for key, value in hand_obs.items()})
+            obs_dict["left_gripper.pos"] = sum(hand_obs.values()) / len(hand_obs)
 
         # Add "right_" prefix
         for key, value in self.right_arm.get_observation().items():
             obs_dict[f"right_{key}"] = value
+        if self.right_hand is not None:
+            hand_obs = self.right_hand.get_observation()
+            obs_dict.update({f"right_{key}": value for key, value in hand_obs.items()})
+            obs_dict["right_gripper.pos"] = sum(hand_obs.values()) / len(hand_obs)
 
         return obs_dict
 
@@ -134,11 +214,31 @@ class BiSOFollower(BimanualMixin, Robot):
             key.removeprefix("right_"): value for key, value in action.items() if key.startswith("right_")
         }
 
-        sent_action_left = self.left_arm.send_action(left_action)
-        sent_action_right = self.right_arm.send_action(right_action)
+        left_gripper = left_action.pop("gripper.pos", None) if self.left_hand is not None else None
+        right_gripper = right_action.pop("gripper.pos", None) if self.right_hand is not None else None
+
+        sent_action_left = dict(self.left_arm.send_action(left_action))
+        sent_action_right = dict(self.right_arm.send_action(right_action))
+
+        if self.left_hand is not None:
+            if left_gripper is None:
+                raise ValueError("Missing left_gripper.pos for AmazingHand control")
+            self.left_hand.send_gripper(float(left_gripper))
+            sent_action_left["gripper.pos"] = float(left_gripper)
+        if self.right_hand is not None:
+            if right_gripper is None:
+                raise ValueError("Missing right_gripper.pos for AmazingHand control")
+            self.right_hand.send_gripper(float(right_gripper))
+            sent_action_right["gripper.pos"] = float(right_gripper)
 
         # Add prefixes back
         prefixed_sent_action_left = {f"left_{key}": value for key, value in sent_action_left.items()}
         prefixed_sent_action_right = {f"right_{key}": value for key, value in sent_action_right.items()}
 
         return {**prefixed_sent_action_left, **prefixed_sent_action_right}
+
+    @check_if_not_connected
+    def disconnect(self) -> None:
+        for device in (self.right_hand, self.left_hand, self.right_arm, self.left_arm):
+            if device is not None and device.is_connected:
+                device.disconnect()
