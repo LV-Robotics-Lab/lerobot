@@ -149,3 +149,25 @@ def test_configure_writes_position_pid_coefficients():
     bus_mock.write.assert_any_call("P_Coefficient", "shoulder_pan", 32)
     bus_mock.write.assert_any_call("I_Coefficient", "shoulder_pan", 1)
     bus_mock.write.assert_any_call("D_Coefficient", "shoulder_pan", 16)
+
+
+def test_arm_only_config_excludes_stock_gripper(tmp_path):
+    captured_motors = {}
+
+    def _bus_side_effect(*_args, **kwargs):
+        captured_motors.update(kwargs["motors"])
+        return _make_bus_mock()
+
+    with patch(
+        "lerobot.robots.so_follower.so_follower.FeetechMotorsBus",
+        side_effect=_bus_side_effect,
+    ):
+        SO100Follower(SO100FollowerConfig(port="/dev/null", calibration_dir=tmp_path, use_gripper=False))
+
+    assert set(captured_motors) == {
+        "shoulder_pan",
+        "shoulder_lift",
+        "elbow_flex",
+        "wrist_flex",
+        "wrist_roll",
+    }
