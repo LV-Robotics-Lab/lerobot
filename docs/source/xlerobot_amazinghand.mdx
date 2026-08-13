@@ -19,7 +19,7 @@ follower arms, and two independently wired AmazingHands. It lives on the
 Both submodules are Apache-2.0 projects. The pins validated by this branch are:
 
 ```text
-amazinghand_wrapper  913e51029584dce51b17b2f80e7aa210f0f63260
+amazinghand_wrapper  c4e704503038273a8935a9ad76ba7ad78165a44e
 xlerobot             3d14695e40c9c68229c0aacffca6053c75cd3eb6
 ```
 
@@ -54,6 +54,33 @@ Before any motion, probe each hand read-only and record its detected baudrate/mo
 amazinghand probe --port /dev/xlerobot-left-hand
 amazinghand probe --port /dev/xlerobot-right-hand
 ```
+
+## Migrate the existing hand calibration
+
+Do not recalibrate a hand that already has its device-specific Pollen `MiddlePos`
+profile. Convert the original profile offline into the filenames loaded by the
+`lv_xlerobot` robot configuration:
+
+```bash
+calibration_dir="${HF_LEROBOT_CALIBRATION:-$HOME/.cache/huggingface/lerobot/calibration}/robots/xlerobot_amazing_follower"
+
+amazinghand migrate-pollen \
+  --source /path/to/the/rigs/AmazingHand_Demo_Both.py \
+  --variable MiddlePos_1 \
+  --output "$calibration_dir/lv_xlerobot_left_amazing_hand.json"
+
+amazinghand migrate-pollen \
+  --source /path/to/the/rigs/AmazingHand_Demo_Both.py \
+  --variable MiddlePos_2 \
+  --output "$calibration_dir/lv_xlerobot_right_amazing_hand.json"
+```
+
+Use the actual file tuned for this pair of hands, not Pollen's unchanged example.
+The migration command only parses and converts calibration values; it does not open
+a serial port or enable torque. It preserves the source variable, middle positions,
+pose deltas, and raw conversion formula in each JSON for auditability. If the old
+profile cannot be recovered, record supervised open/closed endpoints after reconnecting
+the hands instead of guessing values.
 
 ## Teleoperate without recording
 
@@ -112,7 +139,8 @@ Any action/observation failure stops the base and faults both hands; disconnect 
 disables hand torque, and then releases the two Feetech buses. This is a software contract, not
 evidence of real-hardware validation.
 
-The Jingxiang host had no serial devices, cameras, calibration files, or installed LeRobot
-environment attached during the 2026-08-13 migration. Before collection, complete these gates on
-the exact rig: stable udev names, read-only probes, separate arm/hand calibration, supervised
-low-speed motion, camera frame checks, emergency-stop rehearsal, and a bounded soak test.
+At the latest 2026-08-13 check, the Jingxiang host had four SO-101 arm/leader calibration
+files but no AmazingHand profile; its serial devices and cameras had also been disconnected.
+Before collection, recover and migrate the pair-specific hand profile, then complete these
+gates on the exact rig: stable udev names, read-only probes, supervised low-speed motion,
+camera frame checks, emergency-stop rehearsal, and a bounded soak test.
