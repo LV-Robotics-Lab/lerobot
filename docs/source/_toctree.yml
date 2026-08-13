@@ -147,6 +147,8 @@
     title: SO-101
   - local: amazinghand_so101
     title: AmazingHand + SO-101
+  - local: xlerobot_amazinghand
+    title: XLeRobot + AmazingHand
   - local: amazinghand_so101_migration_audit
     title: AmazingHand Migration Audit
   - local: so100

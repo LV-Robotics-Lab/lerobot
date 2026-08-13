@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lerobot_robot_xlerobot_amazing"
+version = "0.1.0"
+description = "LeRobot plugin for XLeRobot with dual SO-101 arms and AmazingHands"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = []
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lerobot_robot_xlerobot_amazing"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

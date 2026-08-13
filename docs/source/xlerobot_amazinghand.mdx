@@ -1,0 +1,118 @@
+# XLeRobot + dual SO-101 + AmazingHand
+
+This integration supports the LV lab rig built from the XLeRobot mobile body, two SO-101
+follower arms, and two independently wired AmazingHands. It lives on the
+`hardware/amazinghand-so101` branch.
+
+## Repository boundary
+
+- `submodules/xlerobot` pins the upstream XLeRobot mechanical files, bus layout, head/base
+  control, and reference software. No XLeRobot source is copied into LeRobot.
+- `submodules/amazinghand_wrapper` owns probing, calibration, grasp synergy, health checks,
+  torque state, and fail-closed hand behavior.
+- `integrations/lerobot_robot_xlerobot_amazing` is a small LeRobot plugin. It exposes the
+  pinned XLeRobot source as `lerobot.robots.xlerobot`, removes the two absent stock ID-6
+  grippers, and routes those two scalar channels to AmazingHand.
+- LeRobot continues to own cameras, dataset schemas, `lerobot-record`, processors, policies,
+  and Hugging Face upload.
+
+Both submodules are Apache-2.0 projects. The pins validated by this branch are:
+
+```text
+amazinghand_wrapper  913e51029584dce51b17b2f80e7aa210f0f63260
+xlerobot             3d14695e40c9c68229c0aacffca6053c75cd3eb6
+```
+
+## Install
+
+```bash
+git checkout hardware/amazinghand-so101
+git submodule update --init --recursive
+uv sync --locked --extra feetech --extra core_scripts --extra pynput-dep
+uv pip install -e submodules/amazinghand_wrapper
+uv pip install -e integrations/lerobot_robot_xlerobot_amazing
+```
+
+The plugin normally finds `submodules/xlerobot` relative to the LeRobot checkout. Set
+`LEROBOT_XLEROBOT_PATH` only when the XLeRobot checkout intentionally lives elsewhere.
+
+## Hardware layout
+
+Use persistent udev symlinks rather than relying on `/dev/ttyACM0` ordering.
+
+| Port | Contents |
+| --- | --- |
+| `port1` | left SO-101 IDs 1-5 and XLeRobot head IDs 7-8 |
+| `port2` | right SO-101 IDs 1-5 and XLeRobot base IDs 7-9 |
+| `left_hand_config.port` | left AmazingHand IDs 1-8 on its independent bus |
+| `right_hand_config.port` | right AmazingHand IDs 1-8 on its independent bus |
+| teleoperator ports | two independent SO-101 leader buses |
+
+Before any motion, probe each hand read-only and record its detected baudrate/model:
+
+```bash
+amazinghand probe --port /dev/xlerobot-left-hand
+amazinghand probe --port /dev/xlerobot-right-hand
+```
+
+## Teleoperate without recording
+
+The composite teleoperator maps standard `bi_so_leader` keys such as
+`left_gripper.pos` to XLeRobot's `left_arm_gripper.pos`. The scalar gripper channels remain
+compatible with a conventional 12-dimensional bimanual SO-101 dataset even though the physical
+grippers are AmazingHands.
+
+```bash
+lerobot-teleoperate \
+  --robot.type=xlerobot_amazing_follower \
+  --robot.id=lv_xlerobot \
+  --robot.port1=/dev/xlerobot-left-head \
+  --robot.port2=/dev/xlerobot-right-base \
+  --robot.left_hand_config.port=/dev/xlerobot-left-hand \
+  --robot.right_hand_config.port=/dev/xlerobot-right-hand \
+  --teleop.type=xlerobot_bi_so_leader \
+  --teleop.id=lv_xlerobot_leaders \
+  --teleop.left_arm_config.port=/dev/xlerobot-left-leader \
+  --teleop.right_arm_config.port=/dev/xlerobot-right-leader
+```
+
+Add `--teleop.control_base=true` to emit `x.vel`, `y.vel`, and `theta.vel` from the
+upstream XLeRobot key layout (`i/k`, `j/l`, `u/o`, speed `n/m`). Keyboard base control requires
+an interactive desktop session; it deliberately fails at connect time on headless SSH/Wayland
+instead of silently producing no commands.
+
+## Record through the standard LeRobot pipeline
+
+```bash
+lerobot-record \
+  --robot.type=xlerobot_amazing_follower \
+  --robot.id=lv_xlerobot \
+  --robot.port1=/dev/xlerobot-left-head \
+  --robot.port2=/dev/xlerobot-right-base \
+  --robot.left_hand_config.port=/dev/xlerobot-left-hand \
+  --robot.right_hand_config.port=/dev/xlerobot-right-hand \
+  --teleop.type=xlerobot_bi_so_leader \
+  --teleop.id=lv_xlerobot_leaders \
+  --teleop.left_arm_config.port=/dev/xlerobot-left-leader \
+  --teleop.right_arm_config.port=/dev/xlerobot-right-leader \
+  --dataset.repo_id=<hf-user-or-org>/<dataset> \
+  --dataset.single_task="<task>" \
+  --dataset.num_episodes=10 \
+  --dataset.fps=30
+```
+
+With base control disabled, actions contain the two 6-value arm/hand groups. With base control
+enabled, the three body velocities are added. Observations always retain the XLeRobot head/base
+state and configured cameras. Keep head pose and camera geometry fixed between collection and
+policy evaluation unless they are intentionally part of the action space.
+
+## Safety and validation status
+
+Any action/observation failure stops the base and faults both hands; disconnect stops the base,
+disables hand torque, and then releases the two Feetech buses. This is a software contract, not
+evidence of real-hardware validation.
+
+The Jingxiang host had no serial devices, cameras, calibration files, or installed LeRobot
+environment attached during the 2026-08-13 migration. Before collection, complete these gates on
+the exact rig: stable udev names, read-only probes, separate arm/hand calibration, supervised
+low-speed motion, camera frame checks, emergency-stop rehearsal, and a bounded soak test.
