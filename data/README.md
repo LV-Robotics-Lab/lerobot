@@ -7,7 +7,7 @@ ignored by Git because they may be large or tied to one physical rig.
 The Jingxiang SO-101/XLeRobot workstation uses this layout:
 
 ```text
-local_data/so101/
+data/so101/
 ├── calibration/
 ├── datasets/
 ├── outputs/

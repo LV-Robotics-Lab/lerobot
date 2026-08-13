@@ -163,10 +163,9 @@ wandb/
 .dev/
 
 # Data folders
-data/
+data/*
+!data/README.md
 outputs/
-local_data/*
-!local_data/README.md
 
 # Translations
 *.mo
