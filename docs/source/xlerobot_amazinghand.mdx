@@ -36,6 +36,17 @@ uv pip install -e integrations/lerobot_robot_xlerobot_amazing
 The plugin normally finds `submodules/xlerobot` relative to the LeRobot checkout. Set
 `LEROBOT_XLEROBOT_PATH` only when the XLeRobot checkout intentionally lives elsewhere.
 
+Jingxiang workstation datasets, calibration copies, camera captures, and port notes live
+under the ignored `local_data/so101/` tree in this checkout. They are local evidence rather
+than source code and must not be committed. Use the browser preview migrated from the original
+SO-101 scratch workspace with:
+
+```bash
+python examples/hardware/so101_camera_preview.py \
+  --camera front=/dev/video2 \
+  --camera side_45=/dev/video0
+```
+
 ## Hardware layout
 
 Use persistent udev symlinks rather than relying on `/dev/ttyACM0` ordering.
