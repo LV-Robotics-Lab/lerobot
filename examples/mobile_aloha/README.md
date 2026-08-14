@@ -35,9 +35,11 @@ The migrated workstation evidence supports these selections:
 | SmolVLA joint | step 1,500 deployment bundle | this was the explicitly exported and checksum-manifested workstation bundle |
 | Diffusion Policy | step 15,000 | lowest recorded eval loss, 0.0107; step 20,000 was 0.0111 |
 
-The SmolVLA expert run and the 216 GB legacy PI0 checkpoint collection are not
-selected for publication without independent evaluation or a documented
-operator choice.
+The SmolVLA expert checkpoints are retained as unselected private history on
+the Hub. The 216 GB legacy PI0 collection was not retained in full because it
+had no independent checkpoint-selection evidence; its two most valuable
+18,000-step artifacts were already preserved in
+`robotics-lv/pi0-attention-audit`.
 
 ## Data-quality audit
 
@@ -53,6 +55,23 @@ The recovered audit ran 24 structural checks with no failures. It also found
 14 constant observation dimensions, a chronological split drift up to 0.606
 standardized mean difference, and a best action/state offset of three frames
 (60 ms). Those are diagnostics, not proof that a policy is safe for hardware.
+
+`audit/report/build_report_artifact.py` rebuilds the report artifact after the
+executed notebook has produced its JSON and CSV evidence files.
+
+## Offline SmolVLA bundle
+
+Download the complete private model repository
+`robotics-lv/smolvla-mobile-aloha-step1500`, then run its packaged smoke test:
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  uv run python /path/to/smolvla-mobile-aloha-step1500/validate_bundle.py
+```
+
+The same loader and validator source is retained under
+`deployment/smolvla_aloha_joint_step1500/`. The bundle must contain
+`pretrained_model/` and `vlm_assets/` beside those scripts.
 
 ## Remote PI0.5 inference
 

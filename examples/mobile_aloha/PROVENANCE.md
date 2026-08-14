@@ -18,6 +18,9 @@ as they existed on the workstation.
 | `remote_inference/ros1_long_horizon.py` | `53212cb8878472e50950d3ce515ecfc6f62490f4f605ca9623ee0854fd88ea3d` |
 | `remote_inference/ros1_safe_home.py` | `a016a5cd42af7a715ff9459787f879ac521c701dc7abe266d88d3f274fbae1ea` |
 | `audit/build_data_quality_notebook.py` | `db2ab3bd7658997a0b1b5e0487da9ab8b6dc72931b0f06e0def8815d33ecebf6` |
+| `audit/report/build_report_artifact.py` | `ac36818912a52a3299847d8e2b6e4d708181dd579d8be82c9408c70fae3affde` |
+| `deployment/smolvla_aloha_joint_step1500/load_policy.py` | `dc5334c1e8902604943992a30e7963399f3133d3b738ae842a622f48790ef80b` |
+| `deployment/smolvla_aloha_joint_step1500/validate_bundle.py` | `1aa6a244027859ab7c0b3a2bb0a47467728c793dd6c1b0596c7f25bc19c54a50` |
 
 The `.orig` files and Python bytecode caches were excluded. Their useful
 changes were already present in the imported current files.
