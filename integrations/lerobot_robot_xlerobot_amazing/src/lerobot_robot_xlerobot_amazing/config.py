@@ -14,6 +14,12 @@ from ._upstream import XLerobotConfig
 class XLerobotAmazingFollowerConfig(XLerobotConfig):
     left_hand_config: AmazingHandAttachmentConfig
     right_hand_config: AmazingHandAttachmentConfig
+    # Neither the XLeRobot body JSON nor the hand JSONs encode physical-device identity. Runtime
+    # use requires an explicit attestation after checking persistent paths and calibration records.
+    calibration_provenance_verified: bool = False
+    # Deliberate escape hatch for ``lerobot-calibrate`` only. Runtime launchers must leave this
+    # false so missing or mismatched calibration fails before any device I/O.
+    allow_interactive_calibration: bool = False
 
 
 @TeleoperatorConfig.register_subclass("xlerobot_bi_so_leader")

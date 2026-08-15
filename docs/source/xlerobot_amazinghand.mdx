@@ -93,6 +93,30 @@ pose deltas, and raw conversion formula in each JSON for auditability. If the ol
 profile cannot be recovered, record supervised open/closed endpoints after reconnecting
 the hands instead of guessing values.
 
+For a deliberate first calibration, use `lerobot-calibrate` and opt in explicitly:
+
+```bash
+lerobot-calibrate \
+  --robot.type=xlerobot_amazing_follower \
+  --robot.id=lv_xlerobot \
+  --robot.port1=/dev/xlerobot-left-head \
+  --robot.port2=/dev/xlerobot-right-base \
+  --robot.left_hand_config.port=/dev/xlerobot-left-hand \
+  --robot.right_hand_config.port=/dev/xlerobot-right-hand \
+  --robot.allow_interactive_calibration=true
+```
+
+That flag only permits the calibration CLI to connect the buses with torque disabled; `connect`
+itself never reads stdin or starts calibration. Never set it in Prometheus, teleoperation,
+recording, or evaluation configs. The default is `false`, so missing body files, mismatched body
+motor IDs, or missing/invalid hand paths and schemas fail before device I/O.
+
+The body and hand calibration JSON formats do not encode physical rig, device serial, or hand-side
+identity. Before runtime, verify all three files against the pair-specific calibration record and
+persistent device paths outside these JSONs. Then explicitly set
+`--robot.calibration_provenance_verified=true`. This flag is an operator attestation, not identity
+evidence synthesized by LeRobot.
+
 ## Teleoperate without recording
 
 The composite teleoperator maps standard `bi_so_leader` keys such as
@@ -108,10 +132,13 @@ lerobot-teleoperate \
   --robot.port2=/dev/xlerobot-right-base \
   --robot.left_hand_config.port=/dev/xlerobot-left-hand \
   --robot.right_hand_config.port=/dev/xlerobot-right-hand \
+  --robot.calibration_provenance_verified=true \
   --teleop.type=xlerobot_bi_so_leader \
   --teleop.id=lv_xlerobot_leaders \
   --teleop.left_arm_config.port=/dev/xlerobot-left-leader \
-  --teleop.right_arm_config.port=/dev/xlerobot-right-leader
+  --teleop.right_arm_config.port=/dev/xlerobot-right-leader \
+  --teleop.left_arm_config.use_degrees=false \
+  --teleop.right_arm_config.use_degrees=false
 ```
 
 Add `--teleop.control_base=true` to emit `x.vel`, `y.vel`, and `theta.vel` from the
@@ -129,10 +156,13 @@ lerobot-record \
   --robot.port2=/dev/xlerobot-right-base \
   --robot.left_hand_config.port=/dev/xlerobot-left-hand \
   --robot.right_hand_config.port=/dev/xlerobot-right-hand \
+  --robot.calibration_provenance_verified=true \
   --teleop.type=xlerobot_bi_so_leader \
   --teleop.id=lv_xlerobot_leaders \
   --teleop.left_arm_config.port=/dev/xlerobot-left-leader \
   --teleop.right_arm_config.port=/dev/xlerobot-right-leader \
+  --teleop.left_arm_config.use_degrees=false \
+  --teleop.right_arm_config.use_degrees=false \
   --dataset.repo_id=<hf-user-or-org>/<dataset> \
   --dataset.single_task="<task>" \
   --dataset.num_episodes=10 \
