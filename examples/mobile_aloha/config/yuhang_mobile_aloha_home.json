@@ -1,0 +1,35 @@
+{
+  "description": "Operator-recorded initial pose from the yuhang Mobile ALOHA workstation on 2026-08-05. Verify wiring, joint order, and calibration before use.",
+  "joint_order": [
+    "left_waist",
+    "left_shoulder",
+    "left_elbow",
+    "left_forearm_roll",
+    "left_wrist_angle",
+    "left_wrist_rotate",
+    "left_gripper",
+    "right_waist",
+    "right_shoulder",
+    "right_elbow",
+    "right_forearm_roll",
+    "right_wrist_angle",
+    "right_wrist_rotate",
+    "right_gripper"
+  ],
+  "joint_positions": [
+    0.004954096,
+    0.0,
+    0.0143913,
+    0.581949284,
+    0.0,
+    -0.014670404,
+    0.0,
+    -0.011827032,
+    0.0,
+    0.016065924,
+    0.563824968,
+    -0.0078498,
+    0.034207684,
+    -0.0001
+  ]
+}
