@@ -19,16 +19,16 @@ The original snapshot recorded its pre-import AmazingHand commit as
 
 ## Migration mapping
 
-| Previous path | New owner |
-| --- | --- |
-| `bi_so_follower/amazing_hand.py` | `submodules/amazinghand_wrapper/src/amazinghand_wrapper/` |
-| `AmazingHandConfig` | wrapper `AmazingHandConfig` plus LeRobot `AmazingHandAttachmentConfig` |
-| scalar-to-eight-motor synergy | wrapper `GripperSynergyMapper` |
-| open/closed JSON calibration | wrapper `HandCalibration` with atomic writes and schema ID |
-| bimanual routing in `BiSOFollower` | explicit `BiSO101AmazingFollower` |
-| missing single-arm composition | new `SO101AmazingFollower` |
-| SO follower `use_gripper` patch | current `SOFollowerConfig.use_gripper` |
-| five mock tests | wrapper safety tests plus LeRobot single/bimanual contract tests |
+| Previous path                      | New owner                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| `bi_so_follower/amazing_hand.py`   | `submodules/amazinghand_wrapper/src/amazinghand_wrapper/`              |
+| `AmazingHandConfig`                | wrapper `AmazingHandConfig` plus LeRobot `AmazingHandAttachmentConfig` |
+| scalar-to-eight-motor synergy      | wrapper `GripperSynergyMapper`                                         |
+| open/closed JSON calibration       | wrapper `HandCalibration` with atomic writes and schema ID             |
+| bimanual routing in `BiSOFollower` | explicit `BiSO101AmazingFollower`                                      |
+| missing single-arm composition     | new `SO101AmazingFollower`                                             |
+| SO follower `use_gripper` patch    | current `SOFollowerConfig.use_gripper`                                 |
+| five mock tests                    | wrapper safety tests plus LeRobot single/bimanual contract tests       |
 
 The original behavior is retained, while baud probing, accepted model-number
 configuration, stale-command rejection, time-based velocity limiting,

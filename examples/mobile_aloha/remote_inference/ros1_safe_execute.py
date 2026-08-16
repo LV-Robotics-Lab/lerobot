@@ -2,7 +2,7 @@
 """Short, rate-limited Mobile ALOHA execution of one remotely inferred action chunk."""
 
 import argparse
-import pickle
+import pickle  # nosec B403: compatibility-bound protocol for an isolated lab RPC
 import socket
 import struct
 import time

@@ -6,7 +6,7 @@ network. Non-loopback binds require an explicit acknowledgement flag.
 """
 
 import argparse
-import pickle
+import pickle  # nosec B403: compatibility-bound protocol for an isolated lab RPC
 import socket
 import struct
 import time

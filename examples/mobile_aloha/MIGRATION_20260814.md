@@ -17,13 +17,13 @@ This record covers the non-Git workstation tree formerly rooted at
 
 All repositories were created private under the `robotics-lv` account.
 
-| Repository | Files | Bytes | Verification |
-| --- | ---: | ---: | --- |
-| `robotics-lv/aloha-mobile-dummy-lerobot-v3` | 50 | 775,087,951 | dataset parquet local SHA-256 matched Hub LFS |
-| `robotics-lv/pi05-mobile-aloha-lora` | 10 | 5,206,113 | adapter load succeeded on CUDA |
-| `robotics-lv/smolvla-mobile-aloha-step1500` | 24 | 911,616,050 | offline bundle smoke test produced finite `[1, 14]` action |
-| `robotics-lv/diffusion-mobile-aloha-step15000` | 9 | 1,172,918,557 | local policy and processors loaded successfully |
-| `robotics-lv/smolvla-mobile-aloha-expert-history` | 30 | 3,627,008,998 | all four local weight hashes matched Hub LFS |
+| Repository                                        | Files |         Bytes | Verification                                               |
+| ------------------------------------------------- | ----: | ------------: | ---------------------------------------------------------- |
+| `robotics-lv/aloha-mobile-dummy-lerobot-v3`       |    50 |   775,087,951 | dataset parquet local SHA-256 matched Hub LFS              |
+| `robotics-lv/pi05-mobile-aloha-lora`              |    10 |     5,206,113 | adapter load succeeded on CUDA                             |
+| `robotics-lv/smolvla-mobile-aloha-step1500`       |    24 |   911,616,050 | offline bundle smoke test produced finite `[1, 14]` action |
+| `robotics-lv/diffusion-mobile-aloha-step15000`    |     9 | 1,172,918,557 | local policy and processors loaded successfully            |
+| `robotics-lv/smolvla-mobile-aloha-expert-history` |    30 | 3,627,008,998 | all four local weight hashes matched Hub LFS               |
 
 The pre-existing private repository `robotics-lv/pi0-attention-audit` retains
 the valuable PI0 `E_18K` and `F1_18K` artifacts. Its 17 Hub files total

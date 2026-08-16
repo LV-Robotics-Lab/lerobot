@@ -29,11 +29,11 @@ STEPS=20000 BATCH_SIZE=32 SAVE_FREQ=5000 \
 
 The migrated workstation evidence supports these selections:
 
-| Policy | Selected artifact | Evidence |
-| --- | --- | --- |
-| PI0.5 LoRA | step 20,000 adapter | completed 20,000 steps; final train loss 0.065 |
-| SmolVLA joint | step 1,500 deployment bundle | this was the explicitly exported and checksum-manifested workstation bundle |
-| Diffusion Policy | step 15,000 | lowest recorded eval loss, 0.0107; step 20,000 was 0.0111 |
+| Policy           | Selected artifact            | Evidence                                                                    |
+| ---------------- | ---------------------------- | --------------------------------------------------------------------------- |
+| PI0.5 LoRA       | step 20,000 adapter          | completed 20,000 steps; final train loss 0.065                              |
+| SmolVLA joint    | step 1,500 deployment bundle | this was the explicitly exported and checksum-manifested workstation bundle |
+| Diffusion Policy | step 15,000                  | lowest recorded eval loss, 0.0107; step 20,000 was 0.0111                   |
 
 The SmolVLA expert checkpoints are retained as unselected private history on
 the Hub. The 216 GB legacy PI0 collection was not retained in full because it
