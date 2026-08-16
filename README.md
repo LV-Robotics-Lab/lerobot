@@ -1,13 +1,13 @@
 ## LV Robotics Lab fork status
 
-| Field | Current status |
-| --- | --- |
-| Owning group | LeRobot real-robot group |
-| Repository role | `entrypoint` / lab-maintained LeRobot integration fork |
-| Lifecycle | `active` |
-| Software integration status | LV-specific AmazingHand and Mobile ALOHA extensions have mock/offline evidence; those checks establish software contracts only and do not prove a live deployment |
+| Field                            | Current status                                                                                                                                                                                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Owning group                     | LeRobot real-robot group                                                                                                                                                                                                         |
+| Repository role                  | `entrypoint` / lab-maintained LeRobot integration fork                                                                                                                                                                           |
+| Lifecycle                        | `active`                                                                                                                                                                                                                         |
+| Software integration status      | LV-specific AmazingHand and Mobile ALOHA extensions have mock/offline evidence; those checks establish software contracts only and do not prove a live deployment                                                                |
 | Field hardware acceptance status | Current repository evidence does not establish real serial-bus discovery, calibration, motion, collection, or soak acceptance for a complete lab hardware combination; each combination requires a separately dated field record |
-| Last governance check | 2026-08-16 |
+| Last governance check            | 2026-08-16                                                                                                                                                                                                                       |
 
 The upstream README is preserved below. Lab-specific status takes precedence for
 the LV fork and must not be inferred from upstream hardware claims.
