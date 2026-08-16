@@ -254,16 +254,12 @@ class BiSO101AmazingFollower(BimanualMixin, Robot):
         observation: RobotObservation = {}
         for key, value in self.left_arm.get_observation().items():
             observation[key if key in self._top_level_cam_keys else f"left_{key}"] = value
-        observation.update(
-            {f"right_{key}": value for key, value in self.right_arm.get_observation().items()}
-        )
+        observation.update({f"right_{key}": value for key, value in self.right_arm.get_observation().items()})
         return observation
 
     @check_if_not_connected
     def send_action(self, action: RobotAction) -> RobotAction:
-        left = {
-            key.removeprefix("left_"): value for key, value in action.items() if key.startswith("left_")
-        }
+        left = {key.removeprefix("left_"): value for key, value in action.items() if key.startswith("left_")}
         right = {
             key.removeprefix("right_"): value for key, value in action.items() if key.startswith("right_")
         }

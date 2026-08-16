@@ -2,16 +2,19 @@
 """Capture one live ROS1 observation and request remote PI0.5 actions; never commands motors."""
 
 import argparse
-import pickle
+import pickle  # nosec B403: compatibility-bound protocol for an isolated lab RPC
 import socket
 import struct
+import tempfile
 import time
+from pathlib import Path
 
 import numpy as np
 import rospy
 from sensor_msgs.msg import Image, JointState
 
 HEADER = struct.Struct("!Q")
+DEFAULT_OUTPUT = Path(tempfile.gettempdir()) / "pi05_actions.npy"
 
 
 def image_to_numpy(msg):
@@ -51,7 +54,7 @@ def main():
     parser.add_argument("--server", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8081)
     parser.add_argument("--task", default="")
-    parser.add_argument("--output", default="/tmp/pi05_actions.npy")
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args(rospy.myargv()[1:])
     rospy.init_node("pi05_remote_dry_run", anonymous=True, disable_signals=True)
 
