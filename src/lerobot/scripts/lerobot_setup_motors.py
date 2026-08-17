@@ -37,7 +37,6 @@ from lerobot.robots import (  # noqa: F401
     make_robot_from_config,
     omx_follower,
     rebot_b601_follower,
-    so101_amazing_follower,
     so_follower,
 )
 from lerobot.teleoperators import (  # noqa: F401
